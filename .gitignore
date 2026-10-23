@@ -1,0 +1,12 @@
+# Configurações sensíveis
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Editores
+.vscode/
+.idea/
