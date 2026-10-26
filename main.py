@@ -9,5 +9,8 @@ with obter_ligacao() as ligacao:
             print(linha[0])
 
 repositorio = CategoriaRepositorio()
-nova = repositorio.criar(Categoria("Bebidas", "Águas, sumos e refrigerantes"))
-print(nova)     
+
+repositorio.criar(Categoria("Papelaria", "Cadernos, canetas e lápis"))
+
+for categoria in repositorio.listar():
+    print(categoria)   
