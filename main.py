@@ -1,5 +1,6 @@
 from src.ligacao import obter_ligacao
 from src.modelos.categoria import Categoria
+from src.repositorios.categoria_repositorio import CategoriaRepositorio
 
 with obter_ligacao() as ligacao:
     with ligacao.cursor() as cursor:
@@ -7,5 +8,6 @@ with obter_ligacao() as ligacao:
         for linha in cursor.fetchall():
             print(linha[0])
 
-teste = Categoria("Bebidas", "Águas, sumos e refrigerantes")
-print(teste)            
+repositorio = CategoriaRepositorio()
+nova = repositorio.criar(Categoria("Bebidas", "Águas, sumos e refrigerantes"))
+print(nova)     
