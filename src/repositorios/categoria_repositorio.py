@@ -34,3 +34,12 @@ class CategoriaRepositorio:
                     "UPDATE categoria SET nome = %s, descricao = %s WHERE id_categoria = %s",
                     (categoria.nome, categoria.descricao, categoria.id_categoria),
                 )
+
+    def apagar(self, id_categoria):
+        """Apaga a categoria com este id."""
+        with obter_ligacao() as ligacao:
+            with ligacao.cursor() as cursor:
+                cursor.execute(
+                    "DELETE FROM categoria WHERE id_categoria = %s",
+                    (id_categoria,),
+                )
