@@ -25,3 +25,12 @@ class CategoriaRepositorio:
         for linha in linhas:
             categorias.append(Categoria(nome=linha[1], descricao=linha[2], id_categoria=linha[0]))
         return categorias
+
+    def editar(self, categoria):
+        """Atualiza o nome e a descrição de uma categoria que já existe."""
+        with obter_ligacao() as ligacao:
+            with ligacao.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE categoria SET nome = %s, descricao = %s WHERE id_categoria = %s",
+                    (categoria.nome, categoria.descricao, categoria.id_categoria),
+                )
