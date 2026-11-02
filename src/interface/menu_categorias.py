@@ -1,6 +1,5 @@
 from src.servicos.categoria_servico import CategoriaServico
 
-
 class MenuCategorias:
     """Menu de consola para gerir categorias."""
 
@@ -8,7 +7,7 @@ class MenuCategorias:
         self.servico = CategoriaServico()
 
     def mostrar(self):
-        """Mostra o menu até o utilizador escolher sair."""
+        """Mostra o menu"""
         while True:
             print()
             print("=== StockFácil — Categorias ===")
@@ -38,6 +37,20 @@ class MenuCategorias:
             print("Erro:", erro)
 
     def listar(self):
-        """Mostra todas as categorias."""
-        for categoria in self.servico.listar():
-            print(categoria)
+        """Mostra todas as categorias numa tabela."""
+        categorias = self.servico.listar()
+
+        if not categorias:
+            print("Ainda não existem categorias registadas.")
+            return
+
+        largura_nome = max(len("Nome"), max(len(categoria.nome) for categoria in categorias))
+
+        print()
+        print("ID".rjust(4), "|", "Nome".ljust(largura_nome), "|", "Descrição")
+        print("-" * (largura_nome + 30))
+        for categoria in categorias:
+            descricao = categoria.descricao or "-"
+            print(str(categoria.id_categoria).rjust(4), "|", categoria.nome.ljust(largura_nome), "|", descricao)
+        print()
+        print(f"Total: {len(categorias)} categoria(s)")
