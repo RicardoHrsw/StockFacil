@@ -10,3 +10,6 @@ venv/
 # Editores
 .vscode/
 .idea/
+
+# Windows
+desktop.ini
