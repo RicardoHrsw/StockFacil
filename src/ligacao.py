@@ -4,13 +4,26 @@ from dotenv import load_dotenv  # lê o ficheiro .env
 
 load_dotenv()  # carrega os dados do .env
 
+TEMPO_MAXIMO_LIGACAO = 5
+
+
+class ErroLigacao(Exception):
+    """A base de dados não está disponível (desligada, dados do .env errados, etc.)."""
+
 
 def obter_ligacao():
     """Devolve uma ligação à base de dados."""
-    return psycopg.connect(
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT"),
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-    )
+    try:
+        return psycopg.connect(
+            host=os.getenv("DB_HOST"),
+            port=os.getenv("DB_PORT"),
+            dbname=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            connect_timeout=TEMPO_MAXIMO_LIGACAO,
+        )
+    except psycopg.OperationalError:
+        raise ErroLigacao(
+            "Não foi possível ligar à base de dados. "
+            "Confirma que o PostgreSQL está ligado e que o ficheiro .env está correto."
+        )

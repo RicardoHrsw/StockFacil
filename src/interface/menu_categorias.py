@@ -1,3 +1,4 @@
+from src.ligacao import ErroLigacao
 from src.servicos.categoria_servico import CategoriaServico
 
 class MenuCategorias:
@@ -16,15 +17,18 @@ class MenuCategorias:
             print("0 - Sair")
             opcao = input("Escolha uma opção: ").strip()
 
-            if opcao == "1":
-                self.registar()
-            elif opcao == "2":
-                self.listar()
-            elif opcao == "0":
-                print("Até breve!")
-                break
-            else:
-                print("Opção inválida. Escolha 1, 2 ou 0.")
+            try:
+                if opcao == "1":
+                    self.registar()
+                elif opcao == "2":
+                    self.listar()
+                elif opcao == "0":
+                    print("Até breve!")
+                    break
+                else:
+                    print("Opção inválida. Escolha 1, 2 ou 0.")
+            except ErroLigacao as erro:
+                print("Erro:", erro)
 
     def registar(self):
         """Pede os dados ao utilizador e regista a categoria."""

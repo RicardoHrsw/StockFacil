@@ -1,5 +1,4 @@
 from psycopg.errors import UniqueViolation
-
 from src.modelos.categoria import Categoria
 from src.repositorios.categoria_repositorio import CategoriaRepositorio
 
@@ -8,10 +7,8 @@ TAMANHO_MAXIMO_DESCRICAO = 255
 
 
 def validar_categoria(nome, descricao):
-    """Limpa e valida os dados. Devolve o nome e a descrição prontos a gravar.
-
-    Não usa a base de dados, por isso pode ser testada sozinha.
-    """
+    """Limpa e valida os dados. Devolve o nome e a descrição prontos a gravar"""
+    
     nome = (nome or "").strip()
     descricao = (descricao or "").strip()
 
