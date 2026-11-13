@@ -14,7 +14,7 @@ class MenuCategorias:
             print("=== StockFácil — Categorias ===")
             print("1 - Registar categoria")
             print("2 - Listar categorias")
-            print("0 - Sair")
+            print("0 - Voltar")
             opcao = input("Escolha uma opção: ").strip()
 
             try:
@@ -23,7 +23,6 @@ class MenuCategorias:
                 elif opcao == "2":
                     self.listar()
                 elif opcao == "0":
-                    print("Até breve!")
                     break
                 else:
                     print("Opção inválida. Escolha 1, 2 ou 0.")

@@ -1,4 +1,4 @@
-from src.interface.menu_categorias import MenuCategorias
+from src.interface.menu_principal import MenuPrincipal
 
 if __name__ == "__main__":
-    MenuCategorias().mostrar()
+    MenuPrincipal().mostrar()
