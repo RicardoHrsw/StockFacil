@@ -87,3 +87,11 @@ python main.py
 ```
 
 Se aparecer *"Não foi possível ligar à base de dados"*, confirma que o serviço do PostgreSQL está ligado e que os dados do `.env` estão certos.
+
+## Testes
+
+Os testes estão na pasta `tests/` e não precisam da base de dados. Para os correr, na pasta do projeto:
+
+```
+python -m unittest -v
+```
