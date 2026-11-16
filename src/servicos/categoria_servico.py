@@ -1,4 +1,4 @@
-from psycopg.errors import UniqueViolation
+from psycopg.errors import ForeignKeyViolation, UniqueViolation
 from src.modelos.categoria import Categoria
 from src.repositorios.categoria_repositorio import CategoriaRepositorio
 
@@ -25,6 +25,17 @@ def validar_categoria(nome, descricao):
     return nome, descricao
 
 
+def converter_id_categoria(valor):
+    """Confirma que o número da categoria é um inteiro positivo."""
+    try:
+        id_categoria = int(str(valor).strip())
+    except ValueError:
+        raise ValueError("Escolha uma categoria da lista, pelo número.")
+    if id_categoria <= 0:
+        raise ValueError("Escolha uma categoria da lista, pelo número.")
+    return id_categoria
+
+
 class CategoriaServico:
     """Regras de negócio das categorias."""
 
@@ -42,3 +53,34 @@ class CategoriaServico:
             return self.repositorio.criar(Categoria(nome, descricao))
         except UniqueViolation:
             raise ValueError(f"Já existe uma categoria chamada '{nome}'.")
+
+    def obter(self, id_categoria):
+        """Devolve a categoria com este número, ou dá erro se não existir."""
+        id_categoria = converter_id_categoria(id_categoria)
+        categoria = self.repositorio.obter(id_categoria)
+        if categoria is None:
+            raise ValueError(f"Não existe nenhuma categoria com o número {id_categoria}.")
+        return categoria
+
+    def editar(self, id_categoria, nome, descricao=None):
+        """Valida os dados novos e atualiza a categoria."""
+        id_categoria = converter_id_categoria(id_categoria)
+        nome, descricao = validar_categoria(nome, descricao)
+        categoria = Categoria(nome, descricao, id_categoria)
+        try:
+            encontrada = self.repositorio.editar(categoria)
+        except UniqueViolation:
+            raise ValueError(f"Já existe uma categoria chamada '{nome}'.")
+        if not encontrada:
+            raise ValueError(f"Não existe nenhuma categoria com o número {id_categoria}.")
+        return categoria
+
+    def apagar(self, id_categoria):
+        """Apaga a categoria, desde que não tenha produtos associados."""
+        id_categoria = converter_id_categoria(id_categoria)
+        try:
+            encontrada = self.repositorio.apagar(id_categoria)
+        except ForeignKeyViolation:
+            raise ValueError("Não é possível apagar esta categoria porque tem produtos associados.")
+        if not encontrada:
+            raise ValueError(f"Não existe nenhuma categoria com o número {id_categoria}.")
