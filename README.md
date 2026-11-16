@@ -13,7 +13,7 @@ O código está organizado em camadas:
 | Repositório | `src/repositorios/` | SQL que guarda e lê da base de dados |
 | Modelo | `src/modelos/` | As classes (ex: `Categoria`) |
 
-**Estado atual:** registar e listar categorias.
+**Estado atual:** registar e listar categorias e produtos (cada produto pertence a uma categoria).
 
 ---
 
