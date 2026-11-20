@@ -13,7 +13,7 @@ O código está organizado em camadas:
 | Repositório | `src/repositorios/` | SQL que guarda e lê da base de dados |
 | Modelo | `src/modelos/` | As classes (ex: `Categoria`) |
 
-**Estado atual:** login com bloqueio após 5 tentativas falhadas; gerir categorias, produtos e fornecedores (registar, listar, editar e apagar ou desativar).
+**Estado atual:** login com bloqueio após 5 tentativas falhadas e alterar a palavra-passe; o Administrador gere categorias, produtos, fornecedores e utilizadores; o Funcionário vê os produtos.
 
 ---
 
@@ -93,7 +93,13 @@ O primeiro ecrã pede o login. Numa base de dados nova existe um Administrador i
 
 No primeiro login, o programa obriga a mudar esta palavra-passe (mínimo 6 caracteres). Depois, cada utilizador pode mudar a sua no menu principal.
 
-A conta fica bloqueada depois de 5 palavras-passe erradas seguidas.
+A conta fica bloqueada depois de 5 palavras-passe erradas seguidas. O Administrador desbloqueia-a no menu **Utilizadores**.
+
+Se for o único Administrador a ficar bloqueado, desbloqueia-o no `psql`:
+
+```
+UPDATE utilizador SET tentativas_falhadas = 0 WHERE username = 'admin';
+```
 
 Se aparecer *"Não foi possível ligar à base de dados"*, confirma que o serviço do PostgreSQL está ligado e que os dados do `.env` estão certos.
 

@@ -1,38 +1,54 @@
 from src.interface.menu_categorias import MenuCategorias
 from src.interface.menu_fornecedores import MenuFornecedores
 from src.interface.menu_produtos import MenuProdutos
+from src.interface.menu_utilizadores import MenuUtilizadores
 from src.interface.palavra_passe import alterar_password
+from src.ligacao import ErroLigacao
 
 
 class MenuPrincipal:
-    """Menu depois do login: escolhe a área a gerir."""
+    """Menu depois do login. O Funcionário só vê as opções do seu perfil (RNF04)."""
 
     def __init__(self, utilizador, autenticacao):
         self.utilizador = utilizador
         self.autenticacao = autenticacao
 
+    def opcoes(self):
+        """Devolve as opções do menu, conforme o perfil, como pares (texto, função)."""
+        if self.utilizador.e_administrador:
+            return [
+                ("Categorias", lambda: MenuCategorias().mostrar()),
+                ("Produtos", lambda: MenuProdutos().mostrar()),
+                ("Fornecedores", lambda: MenuFornecedores().mostrar()),
+                ("Utilizadores", lambda: MenuUtilizadores(self.utilizador).mostrar()),
+                ("Alterar a minha palavra-passe", self.alterar_password),
+            ]
+        return [
+            ("Ver produtos", lambda: MenuProdutos().listar()),
+            ("Alterar a minha palavra-passe", self.alterar_password),
+        ]
+
+    def alterar_password(self):
+        alterar_password(self.autenticacao, self.utilizador)
+
     def mostrar(self):
         """Mostra o menu até o utilizador terminar a sessão."""
         while True:
+            opcoes = self.opcoes()
             print()
             print("=== StockFácil ===")
             print(f"Sessão: {self.utilizador}")
-            print("1 - Categorias")
-            print("2 - Produtos")
-            print("3 - Fornecedores")
-            print("4 - Alterar a minha palavra-passe")
+            for numero, (texto, _) in enumerate(opcoes, start=1):
+                print(f"{numero} - {texto}")
             print("0 - Terminar sessão")
-            opcao = input("Escolha uma opção: ").strip()
+            escolha = input("Escolha uma opção: ").strip()
 
-            if opcao == "1":
-                MenuCategorias().mostrar()
-            elif opcao == "2":
-                MenuProdutos().mostrar()
-            elif opcao == "3":
-                MenuFornecedores().mostrar()
-            elif opcao == "4":
-                alterar_password(self.autenticacao, self.utilizador)
-            elif opcao == "0":
+            if escolha == "0":
                 break
-            else:
-                print("Opção inválida. Escolha 1, 2, 3, 4 ou 0.")
+            if not escolha.isdecimal() or not 1 <= int(escolha) <= len(opcoes):
+                print(f"Opção inválida. Escolha um número de 0 a {len(opcoes)}.")
+                continue
+            try:
+                opcoes[int(escolha) - 1][1]()
+            except ErroLigacao as erro:
+                print("Erro:", erro)

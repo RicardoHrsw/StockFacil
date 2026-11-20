@@ -22,6 +22,15 @@ class Utilizador:
         return self.tentativas_falhadas >= MAXIMO_TENTATIVAS
 
     @property
+    def estado(self):
+        """Texto para a listagem: Ativo, Bloqueado ou Desativado."""
+        if not self.ativo:
+            return "Desativado"
+        if self.bloqueado:
+            return "Bloqueado"
+        return "Ativo"
+
+    @property
     def e_administrador(self):
         return self.nome_perfil == PERFIL_ADMINISTRADOR
 
