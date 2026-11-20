@@ -91,6 +91,8 @@ O primeiro ecrã pede o login. Numa base de dados nova existe um Administrador i
 - username: `admin`
 - palavra-passe: `admin`
 
+No primeiro login, o programa obriga a mudar esta palavra-passe (mínimo 6 caracteres). Depois, cada utilizador pode mudar a sua no menu principal.
+
 A conta fica bloqueada depois de 5 palavras-passe erradas seguidas.
 
 Se aparecer *"Não foi possível ligar à base de dados"*, confirma que o serviço do PostgreSQL está ligado e que os dados do `.env` estão certos.

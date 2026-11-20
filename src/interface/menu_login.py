@@ -1,16 +1,7 @@
-import sys
-from getpass import getpass
-
 from src.interface.menu_principal import MenuPrincipal
+from src.interface.palavra_passe import alterar_password, pedir_password
 from src.ligacao import ErroLigacao
-from src.servicos.autenticacao_servico import AutenticacaoServico
-
-
-def pedir_password(rotulo):
-    """Pede a palavra-passe sem a mostrar no ecrã. Fora de um terminal (ex: testes) usa input."""
-    if sys.stdin.isatty():
-        return getpass(rotulo)
-    return input(rotulo)
+from src.servicos.autenticacao_servico import AutenticacaoServico, precisa_mudar_password
 
 
 class MenuLogin:
@@ -36,6 +27,12 @@ class MenuLogin:
                 print("Erro:", erro)
                 continue
 
+            if precisa_mudar_password(password):
+                print("Está a usar a palavra-passe inicial. Tem de a alterar antes de continuar.")
+                if not alterar_password(self.servico, utilizador, atual=password):
+                    print("A sessão não foi iniciada. Tente outra vez.")
+                    continue
+
             print(f"Bem-vindo, {utilizador.nome}!")
-            MenuPrincipal(utilizador).mostrar()
+            MenuPrincipal(utilizador, self.servico).mostrar()
             print("Sessão terminada.")

@@ -43,6 +43,16 @@ class UtilizadorRepositorio:
                 )
                 return cursor.fetchone()[0]
 
+    def alterar_password(self, id_utilizador, password_hash):
+        """Guarda o hash da nova palavra-passe. Devolve False se o utilizador não existir."""
+        with obter_ligacao() as ligacao:
+            with ligacao.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE utilizador SET password_hash = %s WHERE id_utilizador = %s AND ativo",
+                    (password_hash, id_utilizador),
+                )
+                return cursor.rowcount > 0
+
     def limpar_tentativas(self, id_utilizador):
         """Põe as tentativas falhadas a 0, depois de um login com sucesso."""
         with obter_ligacao() as ligacao:

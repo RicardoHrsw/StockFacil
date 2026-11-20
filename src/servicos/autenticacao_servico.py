@@ -3,7 +3,9 @@ import bcrypt
 from src.modelos.utilizador import MAXIMO_TENTATIVAS
 from src.repositorios.utilizador_repositorio import UtilizadorRepositorio
 
+TAMANHO_MINIMO_PASSWORD = 6
 TAMANHO_MAXIMO_PASSWORD = 72
+PASSWORD_INICIAL = "admin"
 MENSAGEM_DADOS_ERRADOS = "Username ou palavra-passe errados."
 MENSAGEM_BLOQUEADA = "Esta conta está bloqueada. Peça ao Administrador para a desbloquear."
 
@@ -19,6 +21,25 @@ def password_correta(password, password_hash):
     if len(dados) > TAMANHO_MAXIMO_PASSWORD:
         return False
     return bcrypt.checkpw(dados, password_hash.encode("utf-8"))
+
+
+def precisa_mudar_password(password):
+    """Quem entra com a palavra-passe inicial tem de a mudar logo (RF21 e RF20)."""
+    return password == PASSWORD_INICIAL
+
+
+def validar_nova_password(nova, confirmacao):
+    """Confirma que a nova palavra-passe é segura o suficiente e foi escrita duas vezes igual."""
+    nova = nova or ""
+    if len(nova) < TAMANHO_MINIMO_PASSWORD:
+        raise ValueError(f"A palavra-passe tem de ter pelo menos {TAMANHO_MINIMO_PASSWORD} caracteres.")
+    if len(nova.encode("utf-8")) > TAMANHO_MAXIMO_PASSWORD:
+        raise ValueError(f"A palavra-passe não pode ter mais de {TAMANHO_MAXIMO_PASSWORD} caracteres.")
+    if nova != confirmacao:
+        raise ValueError("As duas palavras-passe não são iguais.")
+    if precisa_mudar_password(nova):
+        raise ValueError("Escolha uma palavra-passe diferente da inicial.")
+    return nova
 
 
 class AutenticacaoServico:
@@ -50,3 +71,15 @@ class AutenticacaoServico:
             self.repositorio.limpar_tentativas(utilizador.id_utilizador)
             utilizador.tentativas_falhadas = 0
         return utilizador
+
+    def alterar_password(self, utilizador, atual, nova, confirmacao):
+        """Muda a palavra-passe do utilizador, que tem de indicar a atual (RF20)."""
+        if not password_correta(atual or "", utilizador.password_hash):
+            raise ValueError("A palavra-passe atual está errada.")
+        nova = validar_nova_password(nova, confirmacao)
+        if nova == atual:
+            raise ValueError("A nova palavra-passe tem de ser diferente da atual.")
+        novo_hash = gerar_hash(nova)
+        if not self.repositorio.alterar_password(utilizador.id_utilizador, novo_hash):
+            raise ValueError("Este utilizador já não existe ou foi desativado.")
+        utilizador.password_hash = novo_hash
