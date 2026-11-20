@@ -2,14 +2,13 @@ import os                       # para ler variáveis do sistema
 import psycopg                  # a biblioteca que fala com o PostgreSQL
 from dotenv import load_dotenv  # lê o ficheiro .env
 
-load_dotenv()  # carrega os dados do .env
+load_dotenv()  
 
-TEMPO_MAXIMO_LIGACAO = 5
+TEMPO_MAXIMO_LIGACAO = 10
 
 
 class ErroLigacao(Exception):
     """A base de dados não está disponível (desligada, dados do .env errados, etc.)."""
-
 
 def obter_ligacao():
     """Devolve uma ligação à base de dados."""

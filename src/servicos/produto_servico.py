@@ -105,3 +105,32 @@ class ProdutoServico:
             raise ValueError(f"Já existe um produto com o código '{produto.codigo}'.")
         except ForeignKeyViolation:
             raise ValueError("A categoria escolhida não existe. Escolha uma da lista.")
+
+    def obter(self, codigo):
+        """Devolve o produto ativo com este código, ou dá erro se não existir."""
+        codigo = (codigo or "").strip()
+        if codigo == "":
+            raise ValueError("Escreva o código do produto.")
+        produto = self.repositorio.obter_por_codigo(codigo)
+        if produto is None:
+            raise ValueError(f"Não existe nenhum produto ativo com o código '{codigo}'.")
+        return produto
+
+    def editar(self, id_produto, codigo, nome, preco_venda, id_categoria, descricao=None, stock_minimo=None):
+        """Valida os dados novos e atualiza o produto. O stock atual não muda."""
+        produto = validar_produto(codigo, nome, preco_venda, id_categoria, descricao, stock_minimo)
+        produto.id_produto = id_produto
+        try:
+            encontrado = self.repositorio.editar(produto)
+        except UniqueViolation:
+            raise ValueError(f"Já existe um produto com o código '{produto.codigo}'.")
+        except ForeignKeyViolation:
+            raise ValueError("A categoria escolhida não existe. Escolha uma da lista.")
+        if not encontrado:
+            raise ValueError("Este produto já não existe ou foi desativado.")
+        return produto
+
+    def desativar(self, id_produto):
+        """Desativa o produto: deixa de aparecer, mas o histórico de vendas fica guardado."""
+        if not self.repositorio.desativar(id_produto):
+            raise ValueError("Este produto já não existe ou já estava desativado.")
