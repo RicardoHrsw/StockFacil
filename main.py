@@ -1,4 +1,4 @@
-from src.interface.menu_principal import MenuPrincipal
+from src.interface.menu_login import MenuLogin
 
 if __name__ == "__main__":
-    MenuPrincipal().mostrar()
+    MenuLogin().mostrar()

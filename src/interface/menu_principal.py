@@ -4,17 +4,21 @@ from src.interface.menu_produtos import MenuProdutos
 
 
 class MenuPrincipal:
-    """Primeiro menu do programa: escolhe a área a gerir."""
+    """Menu depois do login: escolhe a área a gerir."""
+
+    def __init__(self, utilizador):
+        self.utilizador = utilizador
 
     def mostrar(self):
-        """Mostra o menu"""
+        """Mostra o menu até o utilizador terminar a sessão."""
         while True:
             print()
             print("=== StockFácil ===")
+            print(f"Sessão: {self.utilizador}")
             print("1 - Categorias")
             print("2 - Produtos")
             print("3 - Fornecedores")
-            print("0 - Sair")
+            print("0 - Terminar sessão")
             opcao = input("Escolha uma opção: ").strip()
 
             if opcao == "1":
@@ -24,7 +28,6 @@ class MenuPrincipal:
             elif opcao == "3":
                 MenuFornecedores().mostrar()
             elif opcao == "0":
-                print("Até breve!")
                 break
             else:
                 print("Opção inválida. Escolha 1, 2, 3 ou 0.")

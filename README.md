@@ -13,7 +13,7 @@ O código está organizado em camadas:
 | Repositório | `src/repositorios/` | SQL que guarda e lê da base de dados |
 | Modelo | `src/modelos/` | As classes (ex: `Categoria`) |
 
-**Estado atual:** registar e listar categorias e produtos (cada produto pertence a uma categoria).
+**Estado atual:** login com bloqueio após 5 tentativas falhadas; gerir categorias, produtos e fornecedores (registar, listar, editar e apagar ou desativar).
 
 ---
 
@@ -85,6 +85,13 @@ Com o ambiente virtual ativo, na pasta do projeto:
 ```
 python main.py
 ```
+
+O primeiro ecrã pede o login. Numa base de dados nova existe um Administrador inicial:
+
+- username: `admin`
+- palavra-passe: `admin`
+
+A conta fica bloqueada depois de 5 palavras-passe erradas seguidas.
 
 Se aparecer *"Não foi possível ligar à base de dados"*, confirma que o serviço do PostgreSQL está ligado e que os dados do `.env` estão certos.
 

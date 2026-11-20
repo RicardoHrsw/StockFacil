@@ -88,3 +88,9 @@ CREATE TABLE registo_acao (
 );
 
 INSERT INTO perfil (nome) VALUES ('Administrador'), ('Funcionario');
+
+-- RF21: Administrador inicial (username: admin, palavra-passe: admin).
+-- A palavra-passe tem de ser alterada no primeiro login (RF20).
+INSERT INTO utilizador (nome, username, password_hash, id_perfil)
+SELECT 'Administrador', 'admin', '$2b$12$h9optSzEEfU1Gie8iJSh0ufLvWhcm08YQBwPpdE4/xP8hF4Q3/Pvq', id_perfil
+FROM perfil WHERE nome = 'Administrador';
