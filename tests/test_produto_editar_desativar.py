@@ -90,6 +90,16 @@ class TestEditarDesativarProduto(unittest.TestCase):
             servico.editar(**dados(id_categoria="99"))
         self.assertIn("categoria escolhida não existe", str(contexto.exception))
 
+    def test_editar_muda_o_fornecedor(self):
+        repositorio = RepositorioFalso()
+        self.criar_servico(repositorio).editar(**dados(id_fornecedor="4"))
+        self.assertEqual(repositorio.editados[0].id_fornecedor, 4)
+
+    def test_editar_pode_tirar_o_fornecedor(self):
+        repositorio = RepositorioFalso()
+        self.criar_servico(repositorio).editar(**dados(id_fornecedor=""))
+        self.assertIsNone(repositorio.editados[0].id_fornecedor)
+
     def test_desativar_produto(self):
         repositorio = RepositorioFalso()
         self.criar_servico(repositorio).desativar(1)

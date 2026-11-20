@@ -4,6 +4,7 @@ from psycopg.errors import ForeignKeyViolation, UniqueViolation
 
 from src.modelos.produto import Produto
 from src.repositorios.produto_repositorio import ProdutoRepositorio
+from src.servicos.fornecedor_servico import converter_id_fornecedor
 
 TAMANHO_MAXIMO_CODIGO = 30
 TAMANHO_MAXIMO_NOME = 100
@@ -56,7 +57,22 @@ def converter_id_categoria(valor):
     return id_categoria
 
 
-def validar_produto(codigo, nome, preco_venda, id_categoria, descricao=None, stock_minimo=None):
+def converter_fornecedor_opcional(valor):
+    """O fornecedor é opcional: em branco fica None, senão tem de ser um número válido."""
+    if valor is None or str(valor).strip() == "":
+        return None
+    return converter_id_fornecedor(valor)
+
+
+def mensagem_chave_estrangeira(erro):
+    """Diz ao utilizador se foi a categoria ou o fornecedor que não existe."""
+    restricao = getattr(erro.diag, "constraint_name", None) or ""
+    if "fornecedor" in restricao:
+        return "O fornecedor escolhido não existe. Escolha um da lista."
+    return "A categoria escolhida não existe. Escolha uma da lista."
+
+
+def validar_produto(codigo, nome, preco_venda, id_categoria, descricao=None, stock_minimo=None, id_fornecedor=None):
     """Limpa e valida os dados. Devolve um Produto pronto a gravar."""
     codigo = (codigo or "").strip()
     nome = (nome or "").strip()
@@ -83,6 +99,7 @@ def validar_produto(codigo, nome, preco_venda, id_categoria, descricao=None, sto
         preco_venda=converter_preco(preco_venda),
         stock_minimo=converter_stock_minimo(stock_minimo),
         id_categoria=converter_id_categoria(id_categoria),
+        id_fornecedor=converter_fornecedor_opcional(id_fornecedor),
     )
 
 
@@ -96,15 +113,15 @@ class ProdutoServico:
         """Devolve os produtos ativos, ordenados por nome."""
         return self.repositorio.listar()
 
-    def criar(self, codigo, nome, preco_venda, id_categoria, descricao=None, stock_minimo=None):
+    def criar(self, codigo, nome, preco_venda, id_categoria, descricao=None, stock_minimo=None, id_fornecedor=None):
         """Valida os dados e grava um produto novo, com stock 0."""
-        produto = validar_produto(codigo, nome, preco_venda, id_categoria, descricao, stock_minimo)
+        produto = validar_produto(codigo, nome, preco_venda, id_categoria, descricao, stock_minimo, id_fornecedor)
         try:
             return self.repositorio.criar(produto)
         except UniqueViolation:
             raise ValueError(f"Já existe um produto com o código '{produto.codigo}'.")
-        except ForeignKeyViolation:
-            raise ValueError("A categoria escolhida não existe. Escolha uma da lista.")
+        except ForeignKeyViolation as erro:
+            raise ValueError(mensagem_chave_estrangeira(erro))
 
     def obter(self, codigo):
         """Devolve o produto ativo com este código, ou dá erro se não existir."""
@@ -116,16 +133,17 @@ class ProdutoServico:
             raise ValueError(f"Não existe nenhum produto ativo com o código '{codigo}'.")
         return produto
 
-    def editar(self, id_produto, codigo, nome, preco_venda, id_categoria, descricao=None, stock_minimo=None):
+    def editar(self, id_produto, codigo, nome, preco_venda, id_categoria, descricao=None, stock_minimo=None,
+               id_fornecedor=None):
         """Valida os dados novos e atualiza o produto. O stock atual não muda."""
-        produto = validar_produto(codigo, nome, preco_venda, id_categoria, descricao, stock_minimo)
+        produto = validar_produto(codigo, nome, preco_venda, id_categoria, descricao, stock_minimo, id_fornecedor)
         produto.id_produto = id_produto
         try:
             encontrado = self.repositorio.editar(produto)
         except UniqueViolation:
             raise ValueError(f"Já existe um produto com o código '{produto.codigo}'.")
-        except ForeignKeyViolation:
-            raise ValueError("A categoria escolhida não existe. Escolha uma da lista.")
+        except ForeignKeyViolation as erro:
+            raise ValueError(mensagem_chave_estrangeira(erro))
         if not encontrado:
             raise ValueError("Este produto já não existe ou foi desativado.")
         return produto

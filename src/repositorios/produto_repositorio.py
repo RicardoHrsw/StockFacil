@@ -3,7 +3,11 @@ from src.modelos.produto import Produto
 
 COLUNAS = """p.id_produto, p.codigo, p.nome, p.descricao, p.preco_venda,
              p.stock_atual, p.stock_minimo, p.ativo, p.id_categoria,
-             p.id_fornecedor, c.nome"""
+             p.id_fornecedor, c.nome, f.nome"""
+
+ORIGEM = """produto p
+            JOIN categoria c ON c.id_categoria = p.id_categoria
+            LEFT JOIN fornecedor f ON f.id_fornecedor = p.id_fornecedor"""
 
 
 def linha_para_produto(linha):
@@ -11,7 +15,7 @@ def linha_para_produto(linha):
     return Produto(
         id_produto=linha[0], codigo=linha[1], nome=linha[2], descricao=linha[3],
         preco_venda=linha[4], stock_atual=linha[5], stock_minimo=linha[6], ativo=linha[7],
-        id_categoria=linha[8], id_fornecedor=linha[9], nome_categoria=linha[10],
+        id_categoria=linha[8], id_fornecedor=linha[9], nome_categoria=linha[10], nome_fornecedor=linha[11],
     )
 
 
@@ -39,8 +43,7 @@ class ProdutoRepositorio:
             with ligacao.cursor() as cursor:
                 cursor.execute(
                     f"""SELECT {COLUNAS}
-                        FROM produto p
-                        JOIN categoria c ON c.id_categoria = p.id_categoria
+                        FROM {ORIGEM}
                         WHERE p.ativo
                         ORDER BY p.nome"""
                 )
@@ -53,8 +56,7 @@ class ProdutoRepositorio:
             with ligacao.cursor() as cursor:
                 cursor.execute(
                     f"""SELECT {COLUNAS}
-                        FROM produto p
-                        JOIN categoria c ON c.id_categoria = p.id_categoria
+                        FROM {ORIGEM}
                         WHERE p.codigo = %s AND p.ativo""",
                     (codigo,),
                 )
@@ -71,10 +73,10 @@ class ProdutoRepositorio:
                 cursor.execute(
                     """UPDATE produto
                        SET codigo = %s, nome = %s, descricao = %s, preco_venda = %s,
-                           stock_minimo = %s, id_categoria = %s
+                           stock_minimo = %s, id_categoria = %s, id_fornecedor = %s
                        WHERE id_produto = %s AND ativo""",
                     (produto.codigo, produto.nome, produto.descricao, produto.preco_venda,
-                     produto.stock_minimo, produto.id_categoria, produto.id_produto),
+                     produto.stock_minimo, produto.id_categoria, produto.id_fornecedor, produto.id_produto),
                 )
                 return cursor.rowcount > 0
 

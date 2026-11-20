@@ -102,6 +102,20 @@ class TestValidarProduto(unittest.TestCase):
         with self.assertRaises(ValueError):
             validar_produto(**produto_valido(id_categoria="0"))
 
+    def test_sem_fornecedor_fica_none(self):
+        self.assertIsNone(validar_produto(**produto_valido(id_fornecedor="  ")).id_fornecedor)
+
+    def test_fornecedor_escolhido_pelo_numero(self):
+        self.assertEqual(validar_produto(**produto_valido(id_fornecedor=" 3 ")).id_fornecedor, 3)
+
+    def test_fornecedor_com_letras_e_recusado(self):
+        with self.assertRaises(ValueError):
+            validar_produto(**produto_valido(id_fornecedor="abc"))
+
+    def test_fornecedor_zero_e_recusado(self):
+        with self.assertRaises(ValueError):
+            validar_produto(**produto_valido(id_fornecedor="0"))
+
 
 class RepositorioFalso:
     """Faz de conta que é o repositório, para testar o serviço sem base de dados."""
@@ -149,6 +163,31 @@ class TestProdutoServico(unittest.TestCase):
         with self.assertRaises(ValueError) as contexto:
             servico.criar(**produto_valido(id_categoria="99"))
         self.assertIn("categoria escolhida não existe", str(contexto.exception))
+
+
+class FornecedorInexistente(ForeignKeyViolation):
+    """Imita o erro do PostgreSQL quando o fornecedor não existe."""
+    diag = type("Diag", (), {"constraint_name": "produto_id_fornecedor_fkey"})()
+
+
+class TestFornecedorDoProduto(unittest.TestCase):
+    """O erro de chave estrangeira diz se o problema é a categoria ou o fornecedor."""
+
+    def criar_servico(self, repositorio):
+        servico = ProdutoServico()
+        servico.repositorio = repositorio
+        return servico
+
+    def test_fornecedor_inexistente_da_mensagem_clara(self):
+        servico = self.criar_servico(RepositorioFalso(erro=FornecedorInexistente))
+        with self.assertRaises(ValueError) as contexto:
+            servico.criar(**produto_valido(id_fornecedor="99"))
+        self.assertIn("fornecedor escolhido não existe", str(contexto.exception))
+
+    def test_produto_com_fornecedor_e_gravado(self):
+        repositorio = RepositorioFalso()
+        self.criar_servico(repositorio).criar(**produto_valido(id_fornecedor="2"))
+        self.assertEqual(repositorio.gravados[0].id_fornecedor, 2)
 
 
 if __name__ == "__main__":

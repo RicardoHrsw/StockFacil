@@ -3,7 +3,7 @@ class Produto:
 
     def __init__(self, codigo, nome, preco_venda, id_categoria, descricao=None,
                  stock_minimo=0, stock_atual=0, ativo=True, id_fornecedor=None,
-                 id_produto=None, nome_categoria=None):
+                 id_produto=None, nome_categoria=None, nome_fornecedor=None):
         self.id_produto = id_produto
         self.codigo = codigo
         self.nome = nome
@@ -15,6 +15,7 @@ class Produto:
         self.id_categoria = id_categoria
         self.id_fornecedor = id_fornecedor
         self.nome_categoria = nome_categoria
+        self.nome_fornecedor = nome_fornecedor
 
     def __str__(self):
         return f"{self.codigo} - {self.nome} ({self.preco_venda} €)"

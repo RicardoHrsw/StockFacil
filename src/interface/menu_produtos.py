@@ -1,5 +1,6 @@
 from src.ligacao import ErroLigacao
 from src.servicos.categoria_servico import CategoriaServico
+from src.servicos.fornecedor_servico import FornecedorServico
 from src.servicos.produto_servico import ProdutoServico
 
 
@@ -14,6 +15,7 @@ class MenuProdutos:
     def __init__(self):
         self.servico = ProdutoServico()
         self.categorias = CategoriaServico()
+        self.fornecedores = FornecedorServico()
 
     def mostrar(self):
         """Mostra o menu"""
@@ -59,8 +61,14 @@ class MenuProdutos:
         self.mostrar_categorias(categorias)
         id_categoria = input("Número da categoria: ")
 
+        id_fornecedor = ""
+        fornecedores = self.fornecedores.listar()
+        if fornecedores:
+            self.mostrar_fornecedores(fornecedores)
+            id_fornecedor = input("Número do fornecedor (opcional, Enter para nenhum): ")
+
         try:
-            produto = self.servico.criar(codigo, nome, preco, id_categoria, descricao, stock_minimo)
+            produto = self.servico.criar(codigo, nome, preco, id_categoria, descricao, stock_minimo, id_fornecedor)
             print(f"Produto '{produto.nome}' registado com o código {produto.codigo}.")
         except ValueError as erro:
             print("Erro:", erro)
@@ -71,6 +79,26 @@ class MenuProdutos:
         print("Categorias:")
         for categoria in categorias:
             print(str(categoria.id_categoria).rjust(4), "-", categoria.nome)
+
+    def mostrar_fornecedores(self, fornecedores):
+        """Mostra a lista de fornecedores para escolher pelo número."""
+        print()
+        print("Fornecedores:")
+        for fornecedor in fornecedores:
+            print(str(fornecedor.id_fornecedor).rjust(4), "-", fornecedor.nome)
+
+    def pedir_fornecedor_ao_editar(self, produto):
+        """Enter mantém o fornecedor atual e '-' deixa o produto sem fornecedor."""
+        id_fornecedor = produto.id_fornecedor or ""
+        fornecedores = self.fornecedores.listar()
+        if not fornecedores:
+            return id_fornecedor
+        self.mostrar_fornecedores(fornecedores)
+        atual = f"{produto.id_fornecedor} - {produto.nome_fornecedor}" if produto.id_fornecedor else "-"
+        resposta = input(f"Número do fornecedor [{atual}] (escreva - para nenhum): ").strip()
+        if resposta == "-":
+            return ""
+        return resposta or id_fornecedor
 
     def editar(self):
         """Mostra a lista, pede o código do produto e os dados novos."""
@@ -91,7 +119,9 @@ class MenuProdutos:
             stock_minimo = input(f"Stock mínimo [{produto.stock_minimo}]: ").strip() or produto.stock_minimo
             self.mostrar_categorias(self.categorias.listar())
             id_categoria = input(f"Número da categoria [{produto.id_categoria} - {produto.nome_categoria}]: ").strip() or produto.id_categoria
-            produto = self.servico.editar(produto.id_produto, codigo, nome, preco, id_categoria, descricao, stock_minimo)
+            id_fornecedor = self.pedir_fornecedor_ao_editar(produto)
+            produto = self.servico.editar(produto.id_produto, codigo, nome, preco, id_categoria, descricao, stock_minimo,
+                                          id_fornecedor)
             print(f"Produto {produto.codigo} atualizado: {produto.nome}.")
         except ValueError as erro:
             print("Erro:", erro)
@@ -122,14 +152,17 @@ class MenuProdutos:
         largura_codigo = max(len("Código"), max(len(p.codigo) for p in produtos))
         largura_nome = max(len("Nome"), max(len(p.nome) for p in produtos))
         largura_categoria = max(len("Categoria"), max(len(p.nome_categoria) for p in produtos))
+        largura_fornecedor = max(len("Fornecedor"), max(len(p.nome_fornecedor or "-") for p in produtos))
 
         print()
         print("Código".ljust(largura_codigo), "|", "Nome".ljust(largura_nome), "|",
-              "Categoria".ljust(largura_categoria), "|", "Preço".rjust(10), "|", "Stock", "|", "Mínimo")
-        print("-" * (largura_codigo + largura_nome + largura_categoria + 40))
+              "Categoria".ljust(largura_categoria), "|", "Fornecedor".ljust(largura_fornecedor), "|",
+              "Preço".rjust(10), "|", "Stock", "|", "Mínimo")
+        print("-" * (largura_codigo + largura_nome + largura_categoria + largura_fornecedor + 43))
         for p in produtos:
             print(p.codigo.ljust(largura_codigo), "|", p.nome.ljust(largura_nome), "|",
-                  p.nome_categoria.ljust(largura_categoria), "|", formatar_preco(p.preco_venda).rjust(10), "|",
+                  p.nome_categoria.ljust(largura_categoria), "|", (p.nome_fornecedor or "-").ljust(largura_fornecedor), "|",
+                  formatar_preco(p.preco_venda).rjust(10), "|",
                   str(p.stock_atual).rjust(5), "|", str(p.stock_minimo).rjust(6))
         print()
         print(f"Total: {len(produtos)} produto(s)")
