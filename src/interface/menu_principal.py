@@ -1,4 +1,5 @@
 from src.interface.menu_categorias import MenuCategorias
+from src.interface.menu_entradas import MenuEntradas
 from src.interface.menu_fornecedores import MenuFornecedores
 from src.interface.menu_produtos import MenuProdutos
 from src.interface.menu_utilizadores import MenuUtilizadores
@@ -20,11 +21,13 @@ class MenuPrincipal:
                 ("Categorias", lambda: MenuCategorias().mostrar()),
                 ("Produtos", lambda: MenuProdutos().mostrar()),
                 ("Fornecedores", lambda: MenuFornecedores().mostrar()),
+                ("Entradas de stock", lambda: MenuEntradas(self.utilizador).mostrar()),
                 ("Utilizadores", lambda: MenuUtilizadores(self.utilizador).mostrar()),
                 ("Alterar a minha palavra-passe", self.alterar_password),
             ]
         return [
             ("Ver produtos", lambda: MenuProdutos().listar()),
+            ("Entradas de stock", lambda: MenuEntradas(self.utilizador).mostrar()),
             ("Alterar a minha palavra-passe", self.alterar_password),
         ]
 

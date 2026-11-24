@@ -12,11 +12,11 @@ TAMANHO_MAXIMO_DESCRICAO = 255
 PRECO_MAXIMO = Decimal("99999999.99")
 
 
-def converter_preco(texto):
+def converter_preco(texto, rotulo="preço de venda"):
     """Converte o preço escrito (ex: "1,20" ou "1.20") num Decimal válido."""
     texto = str(texto or "").strip().replace(",", ".")
     if texto == "":
-        raise ValueError("O preço de venda é obrigatório.")
+        raise ValueError(f"O {rotulo} é obrigatório.")
     try:
         preco = Decimal(texto)
     except InvalidOperation:
