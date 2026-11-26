@@ -45,6 +45,11 @@ class VendaServico:
         if faltas:
             raise ValueError("Não há stock suficiente. A venda não foi gravada.\n  " + "\n  ".join(faltas))
 
+    def alertas_da_venda(self, venda):
+        """Devolve os produtos desta venda que ficaram com stock baixo."""
+        vendidos = {linha.id_produto for linha in venda.linhas}
+        return [p for p in self.produtos.listar_stock_baixo() if p.id_produto in vendidos]
+
     def registar(self, carrinho, utilizador):
         """Grava a venda toda ou nada (RNF06). Devolve a venda com o número e o total."""
         if not carrinho:

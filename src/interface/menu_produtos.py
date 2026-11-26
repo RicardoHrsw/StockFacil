@@ -141,6 +141,27 @@ class MenuProdutos:
         except ValueError as erro:
             print("Erro:", erro)
 
+    def mostrar_alertas(self):
+        """Mostra os produtos com stock igual ou abaixo do mínimo, para saber o que encomendar."""
+        produtos = self.servico.listar_stock_baixo()
+        if not produtos:
+            print("Nenhum produto com stock baixo. Está tudo bem!")
+            return
+
+        largura_nome = max(len("Nome"), max(len(p.nome) for p in produtos))
+        largura_codigo = max(len("Código"), max(len(p.codigo) for p in produtos))
+
+        print()
+        print("Produtos com stock igual ou abaixo do mínimo:")
+        print("Código".ljust(largura_codigo), "|", "Nome".ljust(largura_nome), "|", "Stock", "|", "Mínimo", "|",
+              "Fornecedor")
+        print("-" * (largura_codigo + largura_nome + 40))
+        for p in produtos:
+            print(p.codigo.ljust(largura_codigo), "|", p.nome.ljust(largura_nome), "|", str(p.stock_atual).rjust(5),
+                  "|", str(p.stock_minimo).rjust(6), "|", p.nome_fornecedor or "-")
+        print()
+        print(f"Total: {len(produtos)} produto(s) para encomendar")
+
     def listar(self):
         """Mostra os produtos ativos numa tabela. Devolve False se não houver nenhum."""
         produtos = self.servico.listar()

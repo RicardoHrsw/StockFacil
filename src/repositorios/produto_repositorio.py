@@ -50,6 +50,19 @@ class ProdutoRepositorio:
                 linhas = cursor.fetchall()
         return [linha_para_produto(linha) for linha in linhas]
 
+    def listar_stock_baixo(self):
+        """Devolve os produtos ativos com stock igual ou abaixo do mínimo (RF14)."""
+        with obter_ligacao() as ligacao:
+            with ligacao.cursor() as cursor:
+                cursor.execute(
+                    f"""SELECT {COLUNAS}
+                        FROM {ORIGEM}
+                        WHERE p.ativo AND p.stock_atual <= p.stock_minimo
+                        ORDER BY p.stock_atual, p.nome"""
+                )
+                linhas = cursor.fetchall()
+        return [linha_para_produto(linha) for linha in linhas]
+
     def obter_por_codigo(self, codigo):
         """Devolve o produto ativo com este código, ou None se não existir."""
         with obter_ligacao() as ligacao:

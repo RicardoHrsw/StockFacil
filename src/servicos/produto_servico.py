@@ -113,6 +113,10 @@ class ProdutoServico:
         """Devolve os produtos ativos, ordenados por nome."""
         return self.repositorio.listar()
 
+    def listar_stock_baixo(self):
+        """Devolve os produtos com stock igual ou abaixo do mínimo, os mais urgentes primeiro."""
+        return self.repositorio.listar_stock_baixo()
+
     def criar(self, codigo, nome, preco_venda, id_categoria, descricao=None, stock_minimo=None, id_fornecedor=None):
         """Valida os dados e grava um produto novo, com stock 0."""
         produto = validar_produto(codigo, nome, preco_venda, id_categoria, descricao, stock_minimo, id_fornecedor)

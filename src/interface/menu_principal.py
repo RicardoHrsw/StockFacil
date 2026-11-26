@@ -24,6 +24,7 @@ class MenuPrincipal:
                 ("Fornecedores", lambda: MenuFornecedores().mostrar()),
                 ("Entradas de stock", lambda: MenuEntradas(self.utilizador).mostrar()),
                 ("Vendas", lambda: MenuVendas(self.utilizador).mostrar()),
+                ("Alertas de stock baixo", lambda: MenuProdutos().mostrar_alertas()),
                 ("Utilizadores", lambda: MenuUtilizadores(self.utilizador).mostrar()),
                 ("Alterar a minha palavra-passe", self.alterar_password),
             ]
@@ -31,6 +32,7 @@ class MenuPrincipal:
             ("Vendas", lambda: MenuVendas(self.utilizador).mostrar()),
             ("Entradas de stock", lambda: MenuEntradas(self.utilizador).mostrar()),
             ("Ver produtos", lambda: MenuProdutos().listar()),
+            ("Alertas de stock baixo", lambda: MenuProdutos().mostrar_alertas()),
             ("Alterar a minha palavra-passe", self.alterar_password),
         ]
 

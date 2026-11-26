@@ -10,16 +10,19 @@ SESSAO = Utilizador("Ana", "ana", "h", 2, "Funcionario", id_utilizador=7)
 
 
 class ProdutosFalsos:
-    """AGUA15: 0,60 € e 10 em stock. CAFE: 1,00 € e 3 em stock."""
+    """AGUA15: 0,60 € e 10 em stock. CAFE: 1,00 €, 3 em stock e mínimo 5 (stock baixo)."""
 
     def __init__(self):
         self.produtos = {
             "AGUA15": Produto("AGUA15", "Água", Decimal("0.60"), 1, stock_atual=10, id_produto=1),
-            "CAFE": Produto("CAFE", "Café", Decimal("1.00"), 1, stock_atual=3, id_produto=2),
+            "CAFE": Produto("CAFE", "Café", Decimal("1.00"), 1, stock_minimo=5, stock_atual=3, id_produto=2),
         }
 
     def obter_por_codigo(self, codigo):
         return self.produtos.get(codigo)
+
+    def listar_stock_baixo(self):
+        return [p for p in self.produtos.values() if p.stock_atual <= p.stock_minimo]
 
 
 class VendasFalsas:
@@ -103,6 +106,14 @@ class TestVenda(unittest.TestCase):
         with self.assertRaises(ValueError) as contexto:
             self.servico.registar(self.carrinho(("AGUA15", "1")), SESSAO)
         self.assertIn("não foi gravada", str(contexto.exception))
+
+    def test_alerta_so_dos_produtos_vendidos_com_stock_baixo(self):
+        venda = self.servico.registar(self.carrinho(("AGUA15", "1"), ("CAFE", "1")), SESSAO)
+        self.assertEqual([p.codigo for p in self.servico.alertas_da_venda(venda)], ["CAFE"])
+
+    def test_sem_alerta_se_o_produto_vendido_tem_stock(self):
+        venda = self.servico.registar(self.carrinho(("AGUA15", "1")), SESSAO)
+        self.assertEqual(self.servico.alertas_da_venda(venda), [])
 
 
 if __name__ == "__main__":

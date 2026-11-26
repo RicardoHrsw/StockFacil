@@ -63,6 +63,8 @@ class MenuVendas:
         try:
             venda = self.servico.registar(carrinho, self.sessao)
             print(f"Venda n.º {venda.id_venda} registada. Total: {formatar_preco(venda.total)}")
+            for produto in self.servico.alertas_da_venda(venda):
+                print(f"Atenção: '{produto.nome}' ficou com stock baixo ({produto.stock_atual}, mínimo {produto.stock_minimo}).")
         except ValueError as erro:
             print("Erro:", erro)
 
