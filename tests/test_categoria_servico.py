@@ -3,6 +3,7 @@ import unittest
 from psycopg.errors import UniqueViolation
 
 from src.servicos.categoria_servico import CategoriaServico, validar_categoria
+from tests.falsos import RegistoFalso
 
 
 class TestValidarCategoria(unittest.TestCase):
@@ -80,6 +81,7 @@ class TestCategoriaServico(unittest.TestCase):
     def criar_servico(self, repositorio):
         servico = CategoriaServico()
         servico.repositorio = repositorio
+        servico.registo = RegistoFalso()
         return servico
 
     def test_categoria_valida_e_gravada(self):

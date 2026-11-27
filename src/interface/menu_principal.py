@@ -2,6 +2,7 @@ from src.interface.menu_categorias import MenuCategorias
 from src.interface.menu_entradas import MenuEntradas
 from src.interface.menu_fornecedores import MenuFornecedores
 from src.interface.menu_produtos import MenuProdutos
+from src.interface.menu_registo import mostrar_registo
 from src.interface.menu_utilizadores import MenuUtilizadores
 from src.interface.menu_vendas import MenuVendas
 from src.interface.palavra_passe import alterar_password
@@ -26,6 +27,7 @@ class MenuPrincipal:
                 ("Vendas", lambda: MenuVendas(self.utilizador).mostrar()),
                 ("Alertas de stock baixo", lambda: MenuProdutos().mostrar_alertas()),
                 ("Utilizadores", lambda: MenuUtilizadores(self.utilizador).mostrar()),
+                ("Registo de ações", mostrar_registo),
                 ("Alterar a minha palavra-passe", self.alterar_password),
             ]
         return [

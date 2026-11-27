@@ -4,6 +4,7 @@ from psycopg.errors import ForeignKeyViolation, UniqueViolation
 
 from src.modelos.categoria import Categoria
 from src.servicos.categoria_servico import CategoriaServico
+from tests.falsos import RegistoFalso
 
 
 class RepositorioFalso:
@@ -41,6 +42,7 @@ class TestEditarApagarCategoria(unittest.TestCase):
     def criar_servico(self, repositorio):
         servico = CategoriaServico()
         servico.repositorio = repositorio
+        servico.registo = RegistoFalso()
         return servico
 
     def test_obter_categoria_que_existe(self):

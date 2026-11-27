@@ -13,7 +13,7 @@ O código está organizado em camadas:
 | Repositório | `src/repositorios/` | SQL que guarda e lê da base de dados |
 | Modelo | `src/modelos/` | As classes (ex: `Categoria`) |
 
-**Estado atual:** login com bloqueio após 5 tentativas falhadas e alterar a palavra-passe; o Administrador gere categorias, produtos, fornecedores e utilizadores; o Funcionário vê os produtos.
+**Estado atual:** todos os requisitos essenciais (Must) estão feitos: login com bloqueio e perfis, categorias, produtos, fornecedores, utilizadores, entradas de stock, vendas com várias linhas numa transação, alertas de stock baixo e registo de ações.
 
 ---
 

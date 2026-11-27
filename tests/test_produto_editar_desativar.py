@@ -5,6 +5,7 @@ from psycopg.errors import ForeignKeyViolation, UniqueViolation
 
 from src.modelos.produto import Produto
 from src.servicos.produto_servico import ProdutoServico
+from tests.falsos import RegistoFalso
 
 
 class RepositorioFalso:
@@ -48,6 +49,7 @@ class TestEditarDesativarProduto(unittest.TestCase):
     def criar_servico(self, repositorio):
         servico = ProdutoServico()
         servico.repositorio = repositorio
+        servico.registo = RegistoFalso()
         return servico
 
     def test_obter_produto_pelo_codigo(self):

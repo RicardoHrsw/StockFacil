@@ -1,7 +1,9 @@
 import bcrypt
 
 from src.modelos.utilizador import MAXIMO_TENTATIVAS
+from src import sessao
 from src.repositorios.utilizador_repositorio import UtilizadorRepositorio
+from src.servicos.registo_servico import RegistoServico
 
 TAMANHO_MINIMO_PASSWORD = 6
 TAMANHO_MAXIMO_PASSWORD = 72
@@ -47,6 +49,7 @@ class AutenticacaoServico:
 
     def __init__(self):
         self.repositorio = UtilizadorRepositorio()
+        self.registo = RegistoServico()
 
     def iniciar_sessao(self, username, password):
         """Devolve o utilizador se o login estiver certo; senão dá erro com uma mensagem clara."""
@@ -57,20 +60,31 @@ class AutenticacaoServico:
 
         utilizador = self.repositorio.obter_por_username(username)
         if utilizador is None or not utilizador.ativo:
+            self.registo.registar("LOGIN_FALHADO", f"username '{username}'", utilizador)
             raise ValueError(MENSAGEM_DADOS_ERRADOS)
         if utilizador.bloqueado:
+            self.registo.registar("LOGIN_FALHADO", "conta bloqueada", utilizador)
             raise ValueError(MENSAGEM_BLOQUEADA)
 
         if not password_correta(password, utilizador.password_hash):
             tentativas = self.repositorio.somar_tentativa_falhada(utilizador.id_utilizador)
+            self.registo.registar("LOGIN_FALHADO", f"palavra-passe errada ({tentativas}.ª vez)", utilizador)
             if tentativas >= MAXIMO_TENTATIVAS:
+                self.registo.registar("CONTA_BLOQUEADA", f"{MAXIMO_TENTATIVAS} tentativas falhadas", utilizador)
                 raise ValueError(f"Palavra-passe errada {MAXIMO_TENTATIVAS} vezes seguidas. " + MENSAGEM_BLOQUEADA)
             raise ValueError(MENSAGEM_DADOS_ERRADOS)
 
         if utilizador.tentativas_falhadas > 0:
             self.repositorio.limpar_tentativas(utilizador.id_utilizador)
             utilizador.tentativas_falhadas = 0
+        sessao.iniciar(utilizador)
+        self.registo.registar("LOGIN", None, utilizador)
         return utilizador
+
+    def terminar_sessao(self, utilizador):
+        """Regista o fim da sessão (RF03) e esquece quem estava a usar o programa."""
+        sessao.terminar()
+        self.registo.registar("LOGOUT", None, utilizador)
 
     def alterar_password(self, utilizador, atual, nova, confirmacao):
         """Muda a palavra-passe do utilizador, que tem de indicar a atual (RF20)."""
@@ -83,3 +97,4 @@ class AutenticacaoServico:
         if not self.repositorio.alterar_password(utilizador.id_utilizador, novo_hash):
             raise ValueError("Este utilizador já não existe ou foi desativado.")
         utilizador.password_hash = novo_hash
+        self.registo.registar("ALTERAR_PASSWORD", None, utilizador)

@@ -4,6 +4,7 @@ from decimal import Decimal
 from psycopg.errors import ForeignKeyViolation, UniqueViolation
 
 from src.servicos.produto_servico import ProdutoServico, validar_produto
+from tests.falsos import RegistoFalso
 
 
 def produto_valido(**alteracoes):
@@ -138,6 +139,7 @@ class TestProdutoServico(unittest.TestCase):
     def criar_servico(self, repositorio):
         servico = ProdutoServico()
         servico.repositorio = repositorio
+        servico.registo = RegistoFalso()
         return servico
 
     def test_produto_valido_e_gravado(self):
@@ -176,6 +178,7 @@ class TestFornecedorDoProduto(unittest.TestCase):
     def criar_servico(self, repositorio):
         servico = ProdutoServico()
         servico.repositorio = repositorio
+        servico.registo = RegistoFalso()
         return servico
 
     def test_fornecedor_inexistente_da_mensagem_clara(self):

@@ -5,6 +5,7 @@ from src.modelos.produto import Produto
 from src.modelos.utilizador import Utilizador
 from src.repositorios.venda_repositorio import StockInsuficiente
 from src.servicos.venda_servico import VendaServico
+from tests.falsos import RegistoFalso
 
 SESSAO = Utilizador("Ana", "ana", "h", 2, "Funcionario", id_utilizador=7)
 
@@ -45,6 +46,7 @@ class TestVenda(unittest.TestCase):
         self.vendas = VendasFalsas()
         self.servico = VendaServico()
         self.servico.repositorio = self.vendas
+        self.servico.registo = RegistoFalso()
         self.servico.produtos = ProdutosFalsos()
 
     def carrinho(self, *linhas):
@@ -103,6 +105,7 @@ class TestVenda(unittest.TestCase):
 
     def test_stock_que_acaba_durante_a_gravacao(self):
         self.servico.repositorio = VendasFalsas(falta_stock=True)
+        self.servico.registo = RegistoFalso()
         with self.assertRaises(ValueError) as contexto:
             self.servico.registar(self.carrinho(("AGUA15", "1")), SESSAO)
         self.assertIn("não foi gravada", str(contexto.exception))

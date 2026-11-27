@@ -5,6 +5,7 @@ from psycopg.errors import UniqueViolation
 from src.modelos.utilizador import Utilizador
 from src.servicos.autenticacao_servico import password_correta
 from src.servicos.utilizador_servico import UtilizadorServico, validar_dados
+from tests.falsos import RegistoFalso
 
 
 class TestValidarDados(unittest.TestCase):
@@ -79,6 +80,7 @@ class TestUtilizadorServico(unittest.TestCase):
         self.repositorio = RepositorioFalso()
         self.servico = UtilizadorServico()
         self.servico.repositorio = self.repositorio
+        self.servico.registo = RegistoFalso()
         self.admin = self.repositorio.utilizadores[1]
 
     def test_criar_guarda_hash_e_nao_a_password(self):
@@ -98,6 +100,7 @@ class TestUtilizadorServico(unittest.TestCase):
 
     def test_username_repetido_da_mensagem_clara(self):
         self.servico.repositorio = RepositorioFalso(erro=UniqueViolation)
+        self.servico.registo = RegistoFalso()
         with self.assertRaises(ValueError) as contexto:
             self.servico.criar("Outra Ana", "ana", "2", "caixa2026", "caixa2026")
         self.assertIn("Já existe um utilizador com o username 'ana'", str(contexto.exception))

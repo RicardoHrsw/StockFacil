@@ -3,6 +3,7 @@ from psycopg.errors import UniqueViolation
 from src.modelos.utilizador import PERFIL_ADMINISTRADOR, Utilizador
 from src.repositorios.utilizador_repositorio import UtilizadorRepositorio
 from src.servicos.autenticacao_servico import gerar_hash, validar_nova_password
+from src.servicos.registo_servico import RegistoServico
 
 TAMANHO_MAXIMO_NOME = 100
 TAMANHO_MAXIMO_USERNAME = 50
@@ -42,6 +43,7 @@ class UtilizadorServico:
 
     def __init__(self):
         self.repositorio = UtilizadorRepositorio()
+        self.registo = RegistoServico()
 
     def listar(self):
         """Devolve todos os utilizadores, ordenados por username."""
@@ -74,9 +76,11 @@ class UtilizadorServico:
         password = validar_nova_password(password, confirmacao)
         utilizador = Utilizador(nome, username, gerar_hash(password), perfil[0], perfil[1])
         try:
-            return self.repositorio.criar(utilizador)
+            utilizador = self.repositorio.criar(utilizador)
         except UniqueViolation:
             raise ValueError(f"Já existe um utilizador com o username '{username}'.")
+        self.registo.registar("CRIAR_UTILIZADOR", f"{username} ({perfil[1]})")
+        return utilizador
 
     def editar(self, id_utilizador, nome, username, id_perfil, sessao):
         """Muda o nome, o username e o perfil. O Administrador não pode tirar a si próprio o perfil."""
@@ -94,6 +98,7 @@ class UtilizadorServico:
             raise ValueError(f"Já existe um utilizador com o username '{username}'.")
         if not encontrado:
             raise ValueError("Este utilizador está desativado e não pode ser editado.")
+        self.registo.registar("EDITAR_UTILIZADOR", f"{username} ({utilizador.nome_perfil})")
         return utilizador
 
     def desativar(self, id_utilizador, sessao):
@@ -103,6 +108,7 @@ class UtilizadorServico:
             raise ValueError("Não pode desativar a sua própria conta.")
         if not self.repositorio.desativar(utilizador.id_utilizador):
             raise ValueError("Este utilizador já estava desativado.")
+        self.registo.registar("DESATIVAR_UTILIZADOR", utilizador.username)
         return utilizador
 
     def desbloquear(self, id_utilizador):
@@ -112,4 +118,5 @@ class UtilizadorServico:
             raise ValueError(f"A conta de '{utilizador.username}' não está bloqueada.")
         self.repositorio.limpar_tentativas(utilizador.id_utilizador)
         utilizador.tentativas_falhadas = 0
+        self.registo.registar("DESBLOQUEAR_UTILIZADOR", utilizador.username)
         return utilizador

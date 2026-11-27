@@ -4,6 +4,7 @@ from psycopg.errors import ForeignKeyViolation, UniqueViolation
 
 from src.modelos.produto import Produto
 from src.repositorios.produto_repositorio import ProdutoRepositorio
+from src.servicos.registo_servico import RegistoServico
 from src.servicos.fornecedor_servico import converter_id_fornecedor
 
 TAMANHO_MAXIMO_CODIGO = 30
@@ -108,6 +109,7 @@ class ProdutoServico:
 
     def __init__(self):
         self.repositorio = ProdutoRepositorio()
+        self.registo = RegistoServico()
 
     def listar(self):
         """Devolve os produtos ativos, ordenados por nome."""
@@ -121,11 +123,13 @@ class ProdutoServico:
         """Valida os dados e grava um produto novo, com stock 0."""
         produto = validar_produto(codigo, nome, preco_venda, id_categoria, descricao, stock_minimo, id_fornecedor)
         try:
-            return self.repositorio.criar(produto)
+            produto = self.repositorio.criar(produto)
         except UniqueViolation:
             raise ValueError(f"Já existe um produto com o código '{produto.codigo}'.")
         except ForeignKeyViolation as erro:
             raise ValueError(mensagem_chave_estrangeira(erro))
+        self.registo.registar("CRIAR_PRODUTO", f"{produto.codigo} - {produto.nome}")
+        return produto
 
     def obter(self, codigo):
         """Devolve o produto ativo com este código, ou dá erro se não existir."""
@@ -150,9 +154,11 @@ class ProdutoServico:
             raise ValueError(mensagem_chave_estrangeira(erro))
         if not encontrado:
             raise ValueError("Este produto já não existe ou foi desativado.")
+        self.registo.registar("EDITAR_PRODUTO", f"{produto.codigo} - {produto.nome}")
         return produto
 
     def desativar(self, id_produto):
         """Desativa o produto: deixa de aparecer, mas o histórico de vendas fica guardado."""
         if not self.repositorio.desativar(id_produto):
             raise ValueError("Este produto já não existe ou já estava desativado.")
+        self.registo.registar("DESATIVAR_PRODUTO", f"produto n.º {id_produto}")

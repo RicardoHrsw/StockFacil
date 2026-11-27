@@ -4,6 +4,7 @@ from psycopg.errors import ForeignKeyViolation, UniqueViolation
 
 from src.modelos.fornecedor import Fornecedor
 from src.servicos.fornecedor_servico import FornecedorServico, validar_fornecedor
+from tests.falsos import RegistoFalso
 
 
 class TestValidarFornecedor(unittest.TestCase):
@@ -110,6 +111,7 @@ class TestFornecedorServico(unittest.TestCase):
     def criar_servico(self, repositorio):
         servico = FornecedorServico()
         servico.repositorio = repositorio
+        servico.registo = RegistoFalso()
         return servico
 
     def test_fornecedor_valido_e_gravado(self):

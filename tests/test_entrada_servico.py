@@ -6,6 +6,7 @@ from psycopg.errors import ForeignKeyViolation
 from src.modelos.produto import Produto
 from src.modelos.utilizador import Utilizador
 from src.servicos.entrada_servico import EntradaServico, converter_quantidade
+from tests.falsos import RegistoFalso
 
 SESSAO = Utilizador("Ana", "ana", "h", 2, "Funcionario", id_utilizador=7)
 
@@ -69,6 +70,7 @@ class TestRegistarEntrada(unittest.TestCase):
     def criar_servico(self, entradas=None):
         servico = EntradaServico()
         servico.repositorio = entradas or EntradasFalsas()
+        servico.registo = RegistoFalso()
         servico.produtos = ProdutosFalsos()
         return servico
 

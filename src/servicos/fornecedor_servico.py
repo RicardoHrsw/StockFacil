@@ -2,6 +2,7 @@ from psycopg.errors import ForeignKeyViolation, UniqueViolation
 
 from src.modelos.fornecedor import Fornecedor
 from src.repositorios.fornecedor_repositorio import FornecedorRepositorio
+from src.servicos.registo_servico import RegistoServico
 
 TAMANHO_MAXIMO_NOME = 100
 TAMANHO_MAXIMO_TELEFONE = 20
@@ -69,6 +70,7 @@ class FornecedorServico:
 
     def __init__(self):
         self.repositorio = FornecedorRepositorio()
+        self.registo = RegistoServico()
 
     def listar(self):
         """Devolve todos os fornecedores, ordenados por nome."""
@@ -86,9 +88,11 @@ class FornecedorServico:
         """Valida os dados e grava um fornecedor novo."""
         fornecedor = validar_fornecedor(nome, nif, telefone, email, morada)
         try:
-            return self.repositorio.criar(fornecedor)
+            fornecedor = self.repositorio.criar(fornecedor)
         except UniqueViolation:
             raise ValueError(f"Já existe um fornecedor com o NIF {fornecedor.nif}.")
+        self.registo.registar("CRIAR_FORNECEDOR", f"{fornecedor.id_fornecedor} - {fornecedor.nome}")
+        return fornecedor
 
     def editar(self, id_fornecedor, nome, nif=None, telefone=None, email=None, morada=None):
         """Valida os dados novos e atualiza o fornecedor."""
@@ -100,6 +104,7 @@ class FornecedorServico:
             raise ValueError(f"Já existe um fornecedor com o NIF {fornecedor.nif}.")
         if not encontrado:
             raise ValueError(f"Não existe nenhum fornecedor com o número {fornecedor.id_fornecedor}.")
+        self.registo.registar("EDITAR_FORNECEDOR", f"{fornecedor.id_fornecedor} - {fornecedor.nome}")
         return fornecedor
 
     def apagar(self, id_fornecedor):
@@ -111,3 +116,4 @@ class FornecedorServico:
             raise ValueError("Não é possível apagar este fornecedor porque tem produtos ou entradas de stock associados.")
         if not encontrado:
             raise ValueError(f"Não existe nenhum fornecedor com o número {id_fornecedor}.")
+        self.registo.registar("APAGAR_FORNECEDOR", f"fornecedor n.º {id_fornecedor}")

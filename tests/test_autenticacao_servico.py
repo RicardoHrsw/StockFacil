@@ -5,6 +5,7 @@ import bcrypt
 from src.modelos.utilizador import Utilizador
 from src.servicos.autenticacao_servico import (AutenticacaoServico, gerar_hash, password_correta,
                                               precisa_mudar_password, validar_nova_password)
+from tests.falsos import RegistoFalso
 
 HASH_SEGREDO = bcrypt.hashpw(b"segredo", bcrypt.gensalt(rounds=4)).decode()
 
@@ -57,6 +58,7 @@ class TestIniciarSessao(unittest.TestCase):
     def criar_servico(self, repositorio):
         servico = AutenticacaoServico()
         servico.repositorio = repositorio
+        servico.registo = RegistoFalso()
         return servico
 
     def test_login_certo_devolve_o_utilizador(self):
@@ -132,6 +134,7 @@ class TestAlterarPassword(unittest.TestCase):
         self.repositorio = RepositorioFalso()
         self.servico = AutenticacaoServico()
         self.servico.repositorio = self.repositorio
+        self.servico.registo = RegistoFalso()
         self.utilizador = self.repositorio.utilizador
 
     def test_alterar_com_a_password_atual_certa(self):

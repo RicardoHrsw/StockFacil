@@ -1,6 +1,7 @@
 from psycopg.errors import ForeignKeyViolation, UniqueViolation
 from src.modelos.categoria import Categoria
 from src.repositorios.categoria_repositorio import CategoriaRepositorio
+from src.servicos.registo_servico import RegistoServico
 
 TAMANHO_MAXIMO_NOME = 50
 TAMANHO_MAXIMO_DESCRICAO = 255
@@ -41,6 +42,7 @@ class CategoriaServico:
 
     def __init__(self):
         self.repositorio = CategoriaRepositorio()
+        self.registo = RegistoServico()
 
     def listar(self):
         """Devolve todas as categorias, ordenadas por nome."""
@@ -50,9 +52,11 @@ class CategoriaServico:
         """Valida os dados e grava uma categoria nova."""
         nome, descricao = validar_categoria(nome, descricao)
         try:
-            return self.repositorio.criar(Categoria(nome, descricao))
+            categoria = self.repositorio.criar(Categoria(nome, descricao))
         except UniqueViolation:
             raise ValueError(f"Já existe uma categoria chamada '{nome}'.")
+        self.registo.registar("CRIAR_CATEGORIA", f"{categoria.id_categoria} - {nome}")
+        return categoria
 
     def obter(self, id_categoria):
         """Devolve a categoria com este número, ou dá erro se não existir."""
@@ -73,6 +77,7 @@ class CategoriaServico:
             raise ValueError(f"Já existe uma categoria chamada '{nome}'.")
         if not encontrada:
             raise ValueError(f"Não existe nenhuma categoria com o número {id_categoria}.")
+        self.registo.registar("EDITAR_CATEGORIA", f"{id_categoria} - {nome}")
         return categoria
 
     def apagar(self, id_categoria):
@@ -84,3 +89,4 @@ class CategoriaServico:
             raise ValueError("Não é possível apagar esta categoria porque tem produtos associados.")
         if not encontrada:
             raise ValueError(f"Não existe nenhuma categoria com o número {id_categoria}.")
+        self.registo.registar("APAGAR_CATEGORIA", f"categoria n.º {id_categoria}")

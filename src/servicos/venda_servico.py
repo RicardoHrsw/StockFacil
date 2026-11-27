@@ -3,6 +3,7 @@ from src.repositorios.produto_repositorio import ProdutoRepositorio
 from src.repositorios.venda_repositorio import StockInsuficiente, VendaRepositorio
 from src.servicos.entrada_servico import converter_quantidade
 from src.servicos.produto_servico import PRECO_MAXIMO
+from src.servicos.registo_servico import RegistoServico
 
 
 class VendaServico:
@@ -11,6 +12,7 @@ class VendaServico:
     def __init__(self):
         self.repositorio = VendaRepositorio()
         self.produtos = ProdutoRepositorio()
+        self.registo = RegistoServico()
 
     def listar(self):
         """Devolve as últimas vendas."""
@@ -62,6 +64,10 @@ class VendaServico:
 
         venda = Venda(utilizador.id_utilizador, carrinho, total)
         try:
-            return self.repositorio.registar(venda)
+            venda = self.repositorio.registar(venda)
         except StockInsuficiente as erro:
             raise ValueError(f"Não há stock suficiente de '{erro.linha.nome}'. A venda não foi gravada.")
+        total_texto = f"{venda.total:.2f}".replace(".", ",")
+        self.registo.registar("VENDA", f"venda n.º {venda.id_venda}, {len(carrinho)} linha(s), total {total_texto} €",
+                              utilizador)
+        return venda

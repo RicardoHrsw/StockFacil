@@ -5,6 +5,7 @@ from src.repositorios.entrada_repositorio import EntradaRepositorio
 from src.repositorios.produto_repositorio import ProdutoRepositorio
 from src.servicos.fornecedor_servico import converter_id_fornecedor
 from src.servicos.produto_servico import converter_preco
+from src.servicos.registo_servico import RegistoServico
 
 QUANTIDADE_MAXIMA = 100000
 
@@ -29,6 +30,7 @@ class EntradaServico:
     def __init__(self):
         self.repositorio = EntradaRepositorio()
         self.produtos = ProdutoRepositorio()
+        self.registo = RegistoServico()
 
     def listar(self):
         """Devolve as últimas entradas de stock."""
@@ -61,4 +63,6 @@ class EntradaServico:
             raise ValueError("O fornecedor escolhido não existe. Escolha um da lista.")
         if novo_stock is None:
             raise ValueError("Este produto já não existe ou foi desativado.")
+        self.registo.registar("ENTRADA_STOCK", f"+{entrada.quantidade} {produto.codigo} (stock {novo_stock})",
+                              utilizador)
         return entrada, produto, novo_stock
